@@ -51,25 +51,18 @@ List<Document> searchResults = manager.search(request);
 Installation and Running
 
 1. Clone the repository:
-git clone https://github.com/your-username/document-manager.git
+git clone https://github.com/07krava/InnovateIU_Home_Task
 
 2. Navigate to the project directory:
-cd document-manager
+cd InnovateIU_Home_Task
 
 3. Build the project using Maven:
 mvn clean install
 
-4. Run the tests:
+4. Run automated tests:
 mvn test
 
 Requirements
 Java 11 or newer
 Apache Maven 3.8.4 or newer
 
-Automated Testing
-The project supports automated testing. To run the tests, use:
-mvn test
-
-License
-This project is licensed under the MIT License.
-This README provides a brief description of the project, its features, and installation and usage instructions in English.
