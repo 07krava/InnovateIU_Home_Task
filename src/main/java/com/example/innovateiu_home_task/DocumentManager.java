@@ -40,7 +40,16 @@ public class DocumentManager {
 
         Document existingDocument = storage.get(document.getId());
         if (existingDocument != null) {
+            // Сохраняем созданное время
             document.setCreated(existingDocument.getCreated());
+
+            // Обновляем только если новые значения не равны null
+            if (document.getTitle() == null) {
+                document.setTitle(existingDocument.getTitle());
+            }
+            if (document.getContent() == null) {
+                document.setContent(existingDocument.getContent());
+            }
         } else if (document.getCreated() == null) {
             document.setCreated(Instant.now());
         }
@@ -56,9 +65,15 @@ public class DocumentManager {
      * @return list matched documents
      */
     public List<Document> search(SearchRequest request) {
-        if (storage.isEmpty()) {
-            return Collections.emptyList();
+        if (request == null ||
+                (request.getTitlePrefixes() == null &&
+                        request.getContainsContents() == null &&
+                        request.getAuthorIds() == null &&
+                        request.getCreatedFrom() == null &&
+                        request.getCreatedTo() == null)) {
+            return new ArrayList<>(storage.values()); // Возвращаем все документы, если все поля null
         }
+
         return storage.values().stream()
                 .filter(document -> matchesTitlePrefixes(document, request.getTitlePrefixes()))
                 .filter(document -> containsContents(document, request.getContainsContents()))
@@ -66,6 +81,7 @@ public class DocumentManager {
                 .filter(document -> isWithinCreateRange(document, request.getCreatedFrom(), request.getCreatedTo()))
                 .collect(Collectors.toList());
     }
+
 
     private boolean matchesAuthorIds(Document document, List<String> authorIds) {
         return authorIds == null || authorIds.isEmpty() || authorIds.contains(document.getAuthor().getId());
