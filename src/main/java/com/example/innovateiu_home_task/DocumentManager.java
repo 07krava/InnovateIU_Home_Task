@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -55,8 +56,35 @@ public class DocumentManager {
      * @return list matched documents
      */
     public List<Document> search(SearchRequest request) {
+        if (storage.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return storage.values().stream()
+                .filter(document -> matchesTitlePrefixes(document, request.getTitlePrefixes()))
+                .filter(document -> containsContents(document, request.getContainsContents()))
+                .filter(document -> matchesAuthorIds(document, request.getAuthorIds()))
+                .filter(document -> isWithinCreateRange(document, request.getCreatedFrom(), request.getCreatedTo()))
+                .collect(Collectors.toList());
+    }
 
-        return Collections.emptyList();
+    private boolean matchesAuthorIds(Document document, List<String> authorIds) {
+        return authorIds == null || authorIds.isEmpty() || authorIds.contains(document.getAuthor().getId());
+    }
+
+    private boolean containsContents(Document document, List<String> containsContents) {
+        return containsContents == null || containsContents.isEmpty() ||
+                containsContents.stream().anyMatch(document.getContent()::contains);
+    }
+
+    private boolean matchesTitlePrefixes(Document document, List<String> titlePrefixes) {
+        return titlePrefixes == null || titlePrefixes.isEmpty() ||
+                titlePrefixes.stream().anyMatch(prefix -> document.getTitle().startsWith(prefix));
+    }
+
+    private boolean isWithinCreateRange(Document document, Instant createdFrom, Instant createdTo) {
+        Instant created = document.getCreated();
+        return (createdFrom == null || !created.isBefore(createdFrom)) &&
+                (createdTo == null || !created.isAfter(createdTo));
     }
 
     /**
