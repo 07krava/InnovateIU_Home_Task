@@ -4,9 +4,9 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * For implement this task focus on clear code, and make this solution as simple readable as possible
@@ -19,6 +19,8 @@ import java.util.Optional;
  */
 public class DocumentManager {
 
+    private final Map<String, Document> storage = new HashMap<>();
+
     /**
      * Implementation of this method should upsert the document to your storage
      * And generate unique id if it does not exist, don't change [created] field
@@ -27,8 +29,23 @@ public class DocumentManager {
      * @return saved document
      */
     public Document save(Document document) {
+        if (StringUtils.isEmpty(document.getId())) {
+            String newId;
+            do {
+                newId = UUID.randomUUID().toString();
+            } while (storage.containsKey(newId));
+            document.setId(newId);
+        }
 
-        return null;
+        Document existingDocument = storage.get(document.getId());
+        if (existingDocument != null) {
+            document.setCreated(existingDocument.getCreated());
+        } else if (document.getCreated() == null) {
+            document.setCreated(Instant.now());
+        }
+
+        storage.put(document.getId(), document);
+        return document;
     }
 
     /**
@@ -49,8 +66,7 @@ public class DocumentManager {
      * @return optional document
      */
     public Optional<Document> findById(String id) {
-
-        return Optional.empty();
+        return Optional.ofNullable(storage.get(id));
     }
 
     @Data
