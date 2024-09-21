@@ -2,12 +2,11 @@ package com.example.innovateiu_home_task;
 
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * For implement this task focus on clear code, and make this solution as simple readable as possible
@@ -41,6 +40,7 @@ public class DocumentManager {
     public Document save(Document document) {
         if (StringUtils.isEmpty(document.getId())) {
             String newId;
+            //Handling duplicate ID generation
             do {
                 newId = UUID.randomUUID().toString();
             } while (storage.containsKey(newId));
@@ -76,7 +76,7 @@ public class DocumentManager {
      * If the request is null or all fields in the request are null, it returns all documents in storage.
      *
      * @param request - the search request containing criteria for filtering documents.
-     *                 Each field in the request can be null.
+     *                Each field in the request can be null.
      * @return a list of documents that match the search criteria, or all documents if no criteria are specified.
      */
     public List<Document> search(SearchRequest request) {
@@ -86,7 +86,7 @@ public class DocumentManager {
                         request.getAuthorIds() == null &&
                         request.getCreatedFrom() == null &&
                         request.getCreatedTo() == null)) {
-            return new ArrayList<>(storage.values()); // Возвращаем все документы, если все поля null
+            return new ArrayList<>(storage.values());
         }
 
         return storage.values().stream()
@@ -102,10 +102,10 @@ public class DocumentManager {
      * If the author IDs list is null or empty, the method returns true, indicating
      * that the document matches by default.
      *
-     * @param document - the document to check for a matching author ID.
+     * @param document  - the document to check for a matching author ID.
      * @param authorIds - a list of author IDs to match against. Can be null or empty.
      * @return true if the document's author ID matches one of the provided author IDs,
-     *         or if the authorIds list is null or empty; false otherwise.
+     * or if the authorIds list is null or empty; false otherwise.
      */
     private boolean matchesAuthorIds(Document document, List<String> authorIds) {
         return authorIds == null || authorIds.isEmpty() || authorIds.contains(document.getAuthor().getId());
@@ -116,11 +116,11 @@ public class DocumentManager {
      * If the containsContents list is null or empty, the method returns true,
      * indicating that the document matches by default.
      *
-     * @param document - the document to check for matching content.
+     * @param document         - the document to check for matching content.
      * @param containsContents - a list of keywords to check for within the document's content.
      *                         Can be null or empty.
      * @return true if the document's content contains any of the specified keywords,
-     *         or if the containsContents list is null or empty; false otherwise.
+     * or if the containsContents list is null or empty; false otherwise.
      */
     private boolean containsContents(Document document, List<String> containsContents) {
         return containsContents == null || containsContents.isEmpty() ||
@@ -132,11 +132,11 @@ public class DocumentManager {
      * If the titlePrefixes list is null or empty, the method returns true,
      * indicating that the document matches by default.
      *
-     * @param document - the document to check for matching title prefixes.
+     * @param document      - the document to check for matching title prefixes.
      * @param titlePrefixes - a list of prefixes to check against the document's title.
-     *                       Can be null or empty.
+     *                      Can be null or empty.
      * @return true if the document's title starts with any of the specified prefixes,
-     *         or if the titlePrefixes list is null or empty; false otherwise.
+     * or if the titlePrefixes list is null or empty; false otherwise.
      */
     private boolean matchesTitlePrefixes(Document document, List<String> titlePrefixes) {
         return titlePrefixes == null || titlePrefixes.isEmpty() ||
@@ -149,11 +149,11 @@ public class DocumentManager {
      * in the comparison. A document is considered to be within the range
      * if its creation date is not before createdFrom and not after createdTo.
      *
-     * @param document - the document whose creation date is to be checked.
+     * @param document    - the document whose creation date is to be checked.
      * @param createdFrom - the start of the creation date range; can be null.
-     * @param createdTo - the end of the creation date range; can be null.
+     * @param createdTo   - the end of the creation date range; can be null.
      * @return true if the document's creation date is within the specified range,
-     *         or if the range boundaries are null; false otherwise.
+     * or if the range boundaries are null; false otherwise.
      */
     private boolean isWithinCreateRange(Document document, Instant createdFrom, Instant createdTo) {
         Instant created = document.getCreated();
@@ -173,7 +173,7 @@ public class DocumentManager {
      *
      * @param id - the ID of the document to be retrieved; can be null.
      * @return an Optional containing the document if found, or an empty
-     *         Optional if no document with the given ID exists.
+     * Optional if no document with the given ID exists.
      */
     public Optional<Document> findById(String id) {
         return Optional.ofNullable(storage.get(id));
